@@ -16,14 +16,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    gap: 12,
-    backgroundColor: '#F7F4EB',
-    flexGrow: 1,
-  },
-  count: {
-    fontSize: 14,
-    color: '#6B726A',
-  },
+  container: { padding: 16, gap: 12, backgroundColor: '#F7F4EB', flexGrow: 1 },
+  count: { fontSize: 14, color: '#6B726A' },
 });
