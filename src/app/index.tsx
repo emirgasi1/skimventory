@@ -18,6 +18,8 @@ export default function HomeScreen() {
   const uniqueCategories = new Set(items.map((i) => i.category)).size;
   const totalValue = 450;
 
+
+  
   return (
     <ScrollView
       style={{ backgroundColor: theme.background }}
