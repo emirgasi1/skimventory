@@ -16,3 +16,9 @@ Categories and filtering
 Empty and loading states
 Local persistence (settings / simple copy)
 Cover images in Supabase Storage
+
+
+## Screenshots
+
+| Light Mode | Dark Mode |
+| ![Home in Light mode](docs/home-light.png) | ![Home in Dark mode](docs/home-dark.png) |
