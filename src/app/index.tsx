@@ -2,16 +2,21 @@ import ItemCard from '@/components/ItemCard';
 import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { items } from '@/data/items';
 import { useTheme } from '@/hooks/use-theme';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+
+  const columns = width >= 900 ? 3 : width >= 600 ? 2 : 1;
+  
+  const cardWidth = (width - 2 * Spacing.md - (columns - 1) * Spacing.md) / columns;
 
   const totalItems = items.length;
   const uniqueCategories = new Set(items.map((i) => i.category)).size;
-  const totalValue = 450; 
+  const totalValue = 450;
 
   return (
     <ScrollView
@@ -27,9 +32,14 @@ export default function HomeScreen() {
         <StatBox label="Value (KM)" value={totalValue.toString()} theme={theme} />
       </View>
       
-      <View style={{ gap: Spacing.md, marginTop: Spacing.md }}>
+      
+      <View style={[styles.grid, { gap: Spacing.md }]}>
         {items.map((item) => (
-          <ItemCard key={item.id} item={item} />
+          <ItemCard 
+            key={item.id} 
+            item={item} 
+            style={{ width: cardWidth }} 
+          />
         ))}
       </View>
     </ScrollView>
@@ -53,9 +63,14 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     gap: Spacing.sm,
+    marginBottom: Spacing.md, 
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap', 
   },
   statBox: {
-    flex: 1, 
+    flex: 1,
     padding: Spacing.md,
     borderRadius: Radius.md,
     borderWidth: 1,
