@@ -1,12 +1,33 @@
 import ItemCard from '@/components/ItemCard';
+import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { items } from '@/data/items';
+import { useTheme } from '@/hooks/use-theme';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const totalItems = items.length;
+  const uniqueCategories = new Set(items.map((i) => i.category)).size;
+  const totalValue = 450; 
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.count}>{items.length} items</Text>
-      <View style={{ gap: 12 }}>
+    <ScrollView
+      style={{ backgroundColor: theme.background }}
+      contentContainerStyle={[
+        styles.container,
+        { paddingBottom: Spacing.md + insets.bottom },
+      ]}
+    >
+      <View style={styles.summaryRow}>
+        <StatBox label="Items" value={totalItems.toString()} theme={theme} />
+        <StatBox label="Categories" value={uniqueCategories.toString()} theme={theme} />
+        <StatBox label="Value (KM)" value={totalValue.toString()} theme={theme} />
+      </View>
+      
+      <View style={{ gap: Spacing.md, marginTop: Spacing.md }}>
         {items.map((item) => (
           <ItemCard key={item.id} item={item} />
         ))}
@@ -15,7 +36,37 @@ export default function HomeScreen() {
   );
 }
 
+function StatBox({ label, value, theme }: { label: string; value: string; theme: any }) {
+  return (
+    <View style={[styles.statBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+      <Text style={[styles.statValue, { color: theme.text }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: theme.muted }]}>{label}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  container: { padding: 16, gap: 12, backgroundColor: '#F7F4EB', flexGrow: 1 },
-  count: { fontSize: 14, color: '#6B726A' },
+  container: {
+    padding: Spacing.md,
+    flexGrow: 1,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+  },
+  statBox: {
+    flex: 1, 
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: FontSize.title,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: FontSize.small,
+    marginTop: Spacing.xs,
+  },
 });
