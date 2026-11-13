@@ -1,4 +1,5 @@
 import EmptyState from '@/components/EmptyState';
+import FilterChip from '@/components/FilterChip';
 import ItemCard from '@/components/ItemCard';
 import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { fetchItems } from '@/data/api';
@@ -7,6 +8,8 @@ import type { InventoryItem } from '@/types';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const CATEGORIES = ['all', 'book', 'tool', 'pantry', 'other'] as const;
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -17,6 +20,7 @@ export default function HomeScreen() {
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<string>('all');
 
   const columns = width >= 900 ? 3 : width >= 600 ? 2 : 1;
   const cardWidth = (width - 2 * Spacing.md - (columns - 1) * Spacing.md) / columns;
@@ -74,6 +78,7 @@ export default function HomeScreen() {
     );
   }
 
+  const visibleItems = filter === 'all' ? items : items.filter((i) => i.category === filter);
   const totalItems = items.length;
   const uniqueCategories = new Set(items.map((i) => i.category)).size;
   const totalValue = 450;
@@ -87,7 +92,7 @@ export default function HomeScreen() {
         styles.container,
         { paddingBottom: Spacing.md + insets.bottom },
       ]}
-      data={items}
+      data={visibleItems}
       keyExtractor={(item) => item.id}
       key={columns}
       numColumns={columns}
@@ -98,16 +103,29 @@ export default function HomeScreen() {
       )}
       ListEmptyComponent={
         <EmptyState 
-          title="No items yet" 
-          message="Your inventory will appear here." 
+          title={filter === 'all' ? "No items yet" : `No ${filter} items`}
+          message={filter === 'all' ? "Your inventory will appear here." : "Choose another category."}
         />
       }
       ListHeaderComponent={
-        <View style={styles.summaryRow}>
-          <StatBox label="Items" value={totalItems.toString()} theme={theme} />
-          <StatBox label="Categories" value={uniqueCategories.toString()} theme={theme} />
-          <StatBox label="Value (KM)" value={totalValue.toString()} theme={theme} />
-        </View>
+        <>
+          <View style={styles.summaryRow}>
+            <StatBox label="Items" value={totalItems.toString()} theme={theme} />
+            <StatBox label="Categories" value={uniqueCategories.toString()} theme={theme} />
+            <StatBox label="Value (KM)" value={totalValue.toString()} theme={theme} />
+          </View>
+          
+          <View style={styles.filterRow}>
+            {CATEGORIES.map((cat) => (
+              <FilterChip
+                key={cat}
+                label={cat}
+                selected={filter === cat}
+                onPress={() => setFilter(cat)}
+              />
+            ))}
+          </View>
+        </>
       }
       ListHeaderComponentStyle={{ marginBottom: Spacing.md }}
     />
@@ -151,6 +169,12 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     gap: Spacing.sm,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginTop: Spacing.md,
+    flexWrap: 'wrap',
   },
   statBox: {
     flex: 1,
