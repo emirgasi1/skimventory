@@ -6,8 +6,9 @@ import { fetchItems } from '@/data/api';
 import { useTheme } from '@/hooks/use-theme';
 import type { InventoryItem } from '@/types';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 const CATEGORIES = ['all', 'book', 'tool', 'pantry', 'other'] as const;
 
@@ -82,7 +83,16 @@ export default function HomeScreen() {
   const totalItems = items.length;
   const uniqueCategories = new Set(items.map((i) => i.category)).size;
   const totalValue = 450;
-
+  function confirmDelete(item: InventoryItem) {
+    Alert.alert('Delete item?', `"${item.title}" will be removed.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => setItems((list) => list.filter((i) => i.id !== item.id)),
+      },
+    ]);
+  }
   return (
     <FlatList
       style={{ backgroundColor: theme.background }}
@@ -98,8 +108,12 @@ export default function HomeScreen() {
       numColumns={columns}
       columnWrapperStyle={columns > 1 ? { gap: Spacing.md } : undefined}
       ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
-      renderItem={({ item }) => (
-        <ItemCard item={item} style={{ width: cardWidth }} />
+            renderItem={({ item }) => (
+        <ItemCard 
+          item={item} 
+          style={{ width: cardWidth }} 
+          onLongPress={() => confirmDelete(item)}
+        />
       )}
       ListEmptyComponent={
         <EmptyState 

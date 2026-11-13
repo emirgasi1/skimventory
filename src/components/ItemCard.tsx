@@ -1,28 +1,34 @@
 import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { InventoryItem } from '@/types';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 type ItemCardProps = {
   item: InventoryItem;
+  style?: StyleProp<ViewStyle>;
+  onLongPress?: () => void;
 };
 
-export default function ItemCard({ item }: ItemCardProps) {
+export default function ItemCard({ item, style, onLongPress }: ItemCardProps) {
   const theme = useTheme();
 
   return (
     <Pressable
       onPress={() => console.log('Open', item.id)}
+      onLongPress={onLongPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.title}, ${item.category}`}
+      accessibilityHint="Long press to delete"
+      android_ripple={{ color: theme.border }}
       style={({ pressed }) => [
         styles.card,
         { backgroundColor: theme.card, borderColor: theme.border },
+        style,
         pressed && styles.pressed,
       ]}
     >
       <View style={styles.imageContainer}>
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
-        
-        {/* The Badge over the photo */}
         <View style={[styles.badge, { backgroundColor: theme.primary }]}>
           <Text style={[styles.badgeText, { color: theme.onPrimary }]}>
             {item.category}
