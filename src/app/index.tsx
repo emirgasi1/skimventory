@@ -21,7 +21,8 @@ export default function HomeScreen() {
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<string>('all');
+   const [filter, setFilter] = useState<string>('all');
+  const [sort, setSort] = useState<'default' | 'az' | 'newest'>('default');
 
   const columns = width >= 900 ? 3 : width >= 600 ? 2 : 1;
   const cardWidth = (width - 2 * Spacing.md - (columns - 1) * Spacing.md) / columns;
@@ -79,8 +80,15 @@ export default function HomeScreen() {
     );
   }
 
-  const visibleItems = filter === 'all' ? items : items.filter((i) => i.category === filter);
-  const totalItems = items.length;
+  let visibleItems = filter === 'all' ? items : items.filter((i) => i.category === filter);
+  
+  if (sort === 'az') {
+    visibleItems = [...visibleItems].sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sort === 'newest') {
+    visibleItems = [...visibleItems].sort((a, b) => Number(b.id) - Number(a.id)); 
+  }
+
+  const totalItems = items.length; 
   const uniqueCategories = new Set(items.map((i) => i.category)).size;
   const totalValue = 450;
   function confirmDelete(item: InventoryItem) {
@@ -121,7 +129,7 @@ export default function HomeScreen() {
           message={filter === 'all' ? "Your inventory will appear here." : "Choose another category."}
         />
       }
-      ListHeaderComponent={
+            ListHeaderComponent={
         <>
           <View style={styles.summaryRow}>
             <StatBox label="Items" value={totalItems.toString()} theme={theme} />
@@ -138,6 +146,13 @@ export default function HomeScreen() {
                 onPress={() => setFilter(cat)}
               />
             ))}
+          </View>
+
+          {/* ADD THIS NEW ROW HERE */}
+          <View style={styles.filterRow}>
+            <FilterChip label="Default" selected={sort === 'default'} onPress={() => setSort('default')} />
+            <FilterChip label="A-Z" selected={sort === 'az'} onPress={() => setSort('az')} />
+            <FilterChip label="Newest" selected={sort === 'newest'} onPress={() => setSort('newest')} />
           </View>
         </>
       }
