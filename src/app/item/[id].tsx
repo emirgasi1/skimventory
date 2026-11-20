@@ -2,16 +2,25 @@ import EmptyState from '@/components/EmptyState';
 import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { getItemById } from '@/data/api';
 import { useTheme } from '@/hooks/use-theme';
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ItemDetailsScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const item = id ? getItemById(id) : undefined;
+
+  function handleBackToList() {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }
 
   if (!item) {
     return (
@@ -21,6 +30,12 @@ export default function ItemDetailsScreen() {
           title="Item not found"
           message="No inventory item matches this ID."
         />
+        <Pressable
+          onPress={handleBackToList}
+          style={[styles.button, { backgroundColor: theme.primary }]}
+        >
+          <Text style={[styles.buttonText, { color: theme.onPrimary }]}>Back to the list</Text>
+        </Pressable>
       </View>
     );
   }
@@ -64,6 +79,13 @@ export default function ItemDetailsScreen() {
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Notes</Text>
         <Text style={[styles.notesText, { color: theme.muted }]}>{notesText}</Text>
       </View>
+
+      <Pressable
+        onPress={handleBackToList}
+        style={[styles.button, { backgroundColor: theme.primary }]}
+      >
+        <Text style={[styles.buttonText, { color: theme.onPrimary }]}>Back to the list</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -72,6 +94,7 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
     padding: Spacing.md,
+    gap: Spacing.md,
   },
   container: {
     padding: Spacing.md,
@@ -124,5 +147,15 @@ const styles = StyleSheet.create({
   notesText: {
     fontSize: FontSize.body,
     lineHeight: 22,
+  },
+  button: {
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: FontSize.body,
+    fontWeight: 'bold',
   },
 });
