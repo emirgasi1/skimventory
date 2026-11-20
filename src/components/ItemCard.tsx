@@ -6,19 +6,20 @@ import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from '
 type ItemCardProps = {
   item: InventoryItem;
   style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
   onLongPress?: () => void;
 };
 
-export default function ItemCard({ item, style, onLongPress }: ItemCardProps) {
+export default function ItemCard({ item, style, onPress, onLongPress }: ItemCardProps) {
   const theme = useTheme();
 
   return (
     <Pressable
-      onPress={() => console.log('Open', item.id)}
+      onPress={onPress}
       onLongPress={onLongPress}
       accessibilityRole="button"
       accessibilityLabel={`${item.title}, ${item.category}`}
-      accessibilityHint="Long press to delete"
+      accessibilityHint="Opens the item. Long press to delete."
       android_ripple={{ color: theme.border }}
       style={({ pressed }) => [
         styles.card,

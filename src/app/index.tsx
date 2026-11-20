@@ -5,10 +5,19 @@ import { FontSize, Radius, Spacing } from '@/constants/theme';
 import { fetchItems } from '@/data/api';
 import { useTheme } from '@/hooks/use-theme';
 import type { InventoryItem } from '@/types';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 
 const CATEGORIES = ['all', 'book', 'tool', 'pantry', 'other'] as const;
 
@@ -16,12 +25,13 @@ export default function HomeScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const router = useRouter();
 
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-   const [filter, setFilter] = useState<string>('all');
+  const [filter, setFilter] = useState<string>('all');
   const [sort, setSort] = useState<'default' | 'az' | 'newest'>('default');
 
   const columns = width >= 900 ? 3 : width >= 600 ? 2 : 1;
@@ -81,16 +91,17 @@ export default function HomeScreen() {
   }
 
   let visibleItems = filter === 'all' ? items : items.filter((i) => i.category === filter);
-  
+
   if (sort === 'az') {
     visibleItems = [...visibleItems].sort((a, b) => a.title.localeCompare(b.title));
   } else if (sort === 'newest') {
-    visibleItems = [...visibleItems].sort((a, b) => Number(b.id) - Number(a.id)); 
+    visibleItems = [...visibleItems].sort((a, b) => Number(b.id) - Number(a.id));
   }
 
-  const totalItems = items.length; 
+  const totalItems = items.length;
   const uniqueCategories = new Set(items.map((i) => i.category)).size;
   const totalValue = 450;
+
   function confirmDelete(item: InventoryItem) {
     Alert.alert('Delete item?', `"${item.title}" will be removed.`, [
       { text: 'Cancel', style: 'cancel' },
@@ -101,6 +112,7 @@ export default function HomeScreen() {
       },
     ]);
   }
+
   return (
     <FlatList
       style={{ backgroundColor: theme.background }}
@@ -116,27 +128,33 @@ export default function HomeScreen() {
       numColumns={columns}
       columnWrapperStyle={columns > 1 ? { gap: Spacing.md } : undefined}
       ItemSeparatorComponent={() => <View style={{ height: Spacing.md }} />}
-            renderItem={({ item }) => (
-        <ItemCard 
-          item={item} 
-          style={{ width: cardWidth }} 
+      renderItem={({ item }) => (
+        <ItemCard
+          item={item}
+          style={{ width: cardWidth }}
+          onPress={() =>
+            router.push({
+              pathname: '/item/[id]',
+              params: { id: String(item.id) },
+            })
+          }
           onLongPress={() => confirmDelete(item)}
         />
       )}
       ListEmptyComponent={
-        <EmptyState 
-          title={filter === 'all' ? "No items yet" : `No ${filter} items`}
-          message={filter === 'all' ? "Your inventory will appear here." : "Choose another category."}
+        <EmptyState
+          title={filter === 'all' ? 'No items yet' : `No ${filter} items`}
+          message={filter === 'all' ? 'Your inventory will appear here.' : 'Choose another category.'}
         />
       }
-            ListHeaderComponent={
+      ListHeaderComponent={
         <>
           <View style={styles.summaryRow}>
             <StatBox label="Items" value={totalItems.toString()} theme={theme} />
             <StatBox label="Categories" value={uniqueCategories.toString()} theme={theme} />
             <StatBox label="Value (KM)" value={totalValue.toString()} theme={theme} />
           </View>
-          
+
           <View style={styles.filterRow}>
             {CATEGORIES.map((cat) => (
               <FilterChip
@@ -148,7 +166,6 @@ export default function HomeScreen() {
             ))}
           </View>
 
-          {/* ADD THIS NEW ROW HERE */}
           <View style={styles.filterRow}>
             <FilterChip label="Default" selected={sort === 'default'} onPress={() => setSort('default')} />
             <FilterChip label="A-Z" selected={sort === 'az'} onPress={() => setSort('az')} />
